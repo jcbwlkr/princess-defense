@@ -1,37 +1,41 @@
 var game = require('../game'),
   Phaser = require('phaser').Phaser;
 
-var fragmentSrc = require('../shaders/example.frag');
+var player,
+    alien,
+    floor;
 
-var filter,
-  sprite;
+function loadAssets() {
+  game.load.image('player', 'assets/stick-figure.png');
+  game.load.image('alien', 'assets/alien.png');
+  game.load.image('floor', 'assets/floor.png');
+}
 
 function createBootState() {
+  game.stage.backgroundColor = '#3498db';
+  game.physics.startSystem(Phaser.Physics.ARCADE);
 
-  var headerText = 'Boot State';
+  player = game.add.sprite(0, 0, 'player');
+  alien = game.add.sprite(120, 0, 'alien');
+  floor = game.add.sprite(0, game.world._height - 20, 'floor');
 
-  var headerTextStyle = {
-    font: '26pt Helvetica',
-    fill: '#e0e4f0',
-    align: 'center'
-  };
-
-  filter = new Phaser.Filter(game, null, fragmentSrc);
-  filter.setResolution(800, 800);
-
-  sprite = game.add.sprite();
-  sprite.width = 800;
-  sprite.height = 800;
-  sprite.filters = [filter];
-
-  var headText = game.add.text(game.world.centerX, 32, headerText, headerTextStyle);
+  // Add vertical gravity to the player
+  [player,alien,floor].forEach(function(thing) {
+    game.physics.arcade.enable(thing);
+  });
+  [player,alien].forEach(function(thing) {
+    thing.body.gravity.y = 500;
+  });
+  floor.body.immovable = true;
 }
 
 function updateBootState() {
-  filter.update(game.input.activePointer);
+  game.physics.arcade.collide(player, floor);
+  game.physics.arcade.collide(alien, floor);
 }
 
 var boot = {
+  preload: loadAssets,
   create: createBootState,
   update: updateBootState
 };

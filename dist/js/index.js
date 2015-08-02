@@ -56,8 +56,8 @@
 	
 	
 	
-	game.state.start('boot');
 	
+	game.state.start('boot');
 
 
 /***/ },
@@ -122725,49 +122725,47 @@
 	var game = __webpack_require__(1),
 	  Phaser = __webpack_require__(64).Phaser;
 	
-	var fragmentSrc = __webpack_require__(68);
+	var player,
+	    alien,
+	    floor;
 	
-	var filter,
-	  sprite;
+	function loadAssets() {
+	  game.load.image('player', 'assets/stick-figure.png');
+	  game.load.image('alien', 'assets/alien.png');
+	  game.load.image('floor', 'assets/floor.png');
+	}
 	
 	function createBootState() {
+	  game.stage.backgroundColor = '#3498db';
+	  game.physics.startSystem(Phaser.Physics.ARCADE);
 	
-	  var headerText = 'Boot State';
+	  player = game.add.sprite(0, 0, 'player');
+	  alien = game.add.sprite(120, 0, 'alien');
+	  floor = game.add.sprite(0, game.world._height - 20, 'floor');
 	
-	  var headerTextStyle = {
-	    font: '26pt Helvetica',
-	    fill: '#e0e4f0',
-	    align: 'center'
-	  };
-	
-	  filter = new Phaser.Filter(game, null, fragmentSrc);
-	  filter.setResolution(800, 800);
-	
-	  sprite = game.add.sprite();
-	  sprite.width = 800;
-	  sprite.height = 800;
-	  sprite.filters = [filter];
-	
-	  var headText = game.add.text(game.world.centerX, 32, headerText, headerTextStyle);
+	  // Add vertical gravity to the player
+	  [player,alien,floor].forEach(function(thing) {
+	    game.physics.arcade.enable(thing);
+	  });
+	  [player,alien].forEach(function(thing) {
+	    thing.body.gravity.y = 500;
+	  });
+	  floor.body.immovable = true;
 	}
 	
 	function updateBootState() {
-	  filter.update(game.input.activePointer);
+	  game.physics.arcade.collide(player, floor);
+	  game.physics.arcade.collide(alien, floor);
 	}
 	
 	var boot = {
+	  preload: loadAssets,
 	  create: createBootState,
 	  update: updateBootState
 	};
 	
 	module.exports = boot;
 
-
-/***/ },
-/* 68 */
-/***/ function(module, exports) {
-
-	module.exports=["#ifdef GL_ES","precision mediump float;","#endif","uniform float time;","uniform vec2 mouse;","uniform vec2 resolution;","void main( void ) {","float treshhold = 200.;","vec2 position = gl_FragCoord.xy - mouse.xy * resolution.xy;","float rad = sqrt(position.x * position.x + position.y * position.y) ;","float amp = (treshhold-rad)/treshhold;","if(amp<0.0){ amp=0.0;}","float gray = (sin(rad/ 10. - time * 3.)+0.5)*amp;","gl_FragColor = vec4(gray,gray,gray, 1.0 );","}"];
 
 /***/ }
 /******/ ]);

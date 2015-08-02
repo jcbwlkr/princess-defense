@@ -1,7 +1,7 @@
 #princess-defense
 
 ##About
-Monsters come to capture the princess but get more than the expect!
+Monsters come to capture the princess but get more than they expect!
 
 ###Author
 Name: Jacob Walker
@@ -19,4 +19,3 @@ gulp build
 
 node server
 ```
-
