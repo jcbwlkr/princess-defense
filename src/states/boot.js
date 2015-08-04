@@ -13,6 +13,7 @@ function loadAssets() {
   game.load.image('alien', 'assets/alien.png');
   game.load.image('floor', 'assets/floor.png');
   game.load.image('fireball', 'assets/fireball.png');
+  game.load.image('btn-restart', 'assets/btn-restart.png');
 }
 
 function createBootState() {
@@ -32,6 +33,8 @@ function createBootState() {
   game.physics.arcade.enable(alien);
   alien.body.gravity.y = 500;
   alien.body.velocity.x = 50;
+
+  var btn = game.add.button(0, 0, 'btn-restart', function() { game.state.start('boot'); });
 }
 
 function createPlayer() {
