@@ -4,64 +4,109 @@ var game = require('../game'),
 var player,
     alien,
     floor,
-    cursor;
+    cursor,
+    fireButton
+;
 
 function loadAssets() {
   game.load.image('player', 'assets/stick-figure.png');
   game.load.image('alien', 'assets/alien.png');
   game.load.image('floor', 'assets/floor.png');
+  game.load.image('fireball', 'assets/fireball.png');
 }
 
 function createBootState() {
   cursor = game.input.keyboard.createCursorKeys();
+  fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
   game.stage.backgroundColor = '#3498db';
   game.physics.startSystem(Phaser.Physics.ARCADE);
+
+  createPlayer();
 
   floor = game.add.sprite(0, game.world._height - 20, 'floor');
   game.physics.arcade.enable(floor);
   floor.body.immovable = true;
 
-  player = game.add.sprite(game.world.centerX, game.world._height - 20 - 128, 'player');
   alien = game.add.sprite(200, game.world._height - 20 - 128, 'alien');
+  game.physics.arcade.enable(alien);
+  alien.body.gravity.y = 500;
+  alien.body.velocity.x = 50;
+}
 
-  // Add vertical gravity to the player
-  [player,alien].forEach(function(thing) {
-    game.physics.arcade.enable(thing);
-    thing.body.gravity.y = 500;
-  });
+function createPlayer() {
+  var sp = game.add.sprite(game.world.centerX, game.world._height - 20 - 128, 'player') 
+  game.physics.arcade.enable(sp);
+  sp.body.gravity.y = 500;
+  sp.anchor.set(0.5);
+
+  var bullets = game.add.group()
+  bullets.enableBody = true;
+  bullets.physicsBodyType = Phaser.Physics.ARCADE;
+  bullets.createMultiple(50, 'fireball');
+  bullets.setAll('checkWorldBounds', true);
+  bullets.setAll('outOfBoundsKill', true);
+
+  var fireRate = 400, // Higher is less frequent
+      fireSpeed = 400, // Higher is faster bullets
+      nextFire = 0,
+      facing = 'left';
+
+  var fire = function() {
+    if (game.time.now > nextFire && bullets.countDead() > 0) {
+      nextFire = game.time.now + fireRate;
+      var bullet = bullets.getFirstDead();
+      bullet.reset(sp.x - 8, sp.y - 8);
+      bullet.body.velocity.x = (facing === 'left' ? -fireSpeed : fireSpeed);
+    }
+  };
+
+  player = {
+    sprite: sp,
+    turnLeft: function() { facing = 'left'; },
+    turnRight: function() { facing = 'right'; },
+    fire: fire,
+    bullets: bullets,
+  }
 }
 
 function movePlayer() {
   // If the left arrow key is pressed
   if (cursor.left.isDown) {
     // Move the player to the left
-    player.body.velocity.x = -200;
+    player.sprite.body.velocity.x = -200;
+    player.turnLeft();
   }
 
   // If the right arrow key is pressed
   else if (cursor.right.isDown) {
     // Move the player to the right
-    player.body.velocity.x = 200;
+    player.sprite.body.velocity.x = 200;
+    player.turnRight();
   }
 
   // If neither the right or left arrow key is pressed
   else {
     // Stop the player
-    player.body.velocity.x = 0;
+    player.sprite.body.velocity.x = 0;
   }
 
   // If the up arrow key is pressed and the player is touching the ground
-  if (cursor.up.isDown && player.body.touching.down) {
+  if (cursor.up.isDown && player.sprite.body.touching.down) {
     // Move the player upward (jump)
-    player.body.velocity.y = -320;
+    player.sprite.body.velocity.y = -320;
+  }
+
+  if (fireButton.isDown) {
+    player.fire();
   }
 }
 
 function updateBootState() {
-  game.physics.arcade.collide(player, floor);
+  game.physics.arcade.collide(player.sprite, floor);
   game.physics.arcade.collide(alien, floor);
-  game.physics.arcade.collide(player, alien);
+  game.physics.arcade.collide(player.sprite, alien);
+  game.physics.arcade.collide(player.bullets, alien);
 
   movePlayer();
 }
