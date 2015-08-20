@@ -4,6 +4,7 @@ var game = require('../game'),
 var player,
     alien,
     floor,
+    floorPosition,
     cursor,
     fireButton
 ;
@@ -11,12 +12,14 @@ var player,
 function loadAssets() {
   game.load.image('player', 'assets/stick-figure.png');
   game.load.image('alien', 'assets/alien.png');
-  game.load.image('floor', 'assets/floor.png');
+  game.load.image('ogre', 'assets/ogre.png');
   game.load.image('fireball', 'assets/fireball.png');
   game.load.image('btn-restart', 'assets/btn-restart.png');
 }
 
 function createBootState() {
+  floorPosition = game.world.height - 60;
+
   cursor = game.input.keyboard.createCursorKeys();
   fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
@@ -25,23 +28,28 @@ function createBootState() {
 
   createPlayer();
 
-  floor = game.add.sprite(0, game.world._height - 20, 'floor');
+  // Make an invisible sprite that starts 800 pixels off the left of the world
+  // and extends to 800 pixels off the right. It floats 60 pixels off the
+  // bottom. This serves as the floor of the level.
+  floor = game.add.sprite(-800, floorPosition);
+  floor.scale.x = game.world.width + 1600;
   game.physics.arcade.enable(floor);
   floor.body.immovable = true;
 
-  alien = game.add.sprite(200, game.world._height - 20 - 128, 'alien');
+  alien = game.add.sprite(-200, floorPosition, 'alien');
   game.physics.arcade.enable(alien);
   alien.body.gravity.y = 500;
   alien.body.velocity.x = 50;
+  alien.anchor.set(0.5, 1.0);
 
   var btn = game.add.button(0, 0, 'btn-restart', function() { game.state.start('boot'); });
 }
 
 function createPlayer() {
-  var sp = game.add.sprite(game.world.centerX, game.world._height - 20 - 128, 'player') 
+  var sp = game.add.sprite(game.world.centerX, floorPosition, 'player') 
   game.physics.arcade.enable(sp);
   sp.body.gravity.y = 500;
-  sp.anchor.set(0.5);
+  sp.anchor.set(0.5, 1.0);
 
   var bullets = game.add.group()
   bullets.enableBody = true;
@@ -59,7 +67,7 @@ function createPlayer() {
     if (game.time.now > nextFire && bullets.countDead() > 0) {
       nextFire = game.time.now + fireRate;
       var bullet = bullets.getFirstDead();
-      bullet.reset(sp.x - 8, sp.y - 8);
+      bullet.reset(sp.x, sp.y - 64);
       bullet.body.velocity.x = (facing === 'left' ? -fireSpeed : fireSpeed);
     }
   };
