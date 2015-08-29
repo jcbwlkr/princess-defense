@@ -11,6 +11,7 @@ var player,
 ;
 
 function loadAssets() {
+  game.load.image('background', 'assets/tilesets/background.png');
   game.load.image('player', 'assets/stick-figure.png');
   game.load.image('alien', 'assets/alien.png');
   game.load.image('ogre', 'assets/ogre.png');
@@ -20,6 +21,8 @@ function loadAssets() {
 }
 
 function createBootState() {
+  game.add.tileSprite(0, 0, game.world.height, game.world.width, 'background');
+
   floorPosition = game.world.height - 60;
 
   cursor = game.input.keyboard.createCursorKeys();
@@ -38,7 +41,7 @@ function createBootState() {
   game.physics.arcade.enable(floor);
   floor.body.immovable = true;
 
-  alien = game.add.sprite(-200, floorPosition, 'ogre');
+  alien = game.add.sprite(-200, floorPosition, 'alien');
   game.physics.arcade.enable(alien);
   alien.body.gravity.y = 500;
   alien.body.velocity.x = 50;
