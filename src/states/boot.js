@@ -3,6 +3,7 @@ var game = require('../game'),
 
 var player,
     alien,
+    eris,
     floor,
     floorPosition,
     cursor,
@@ -13,6 +14,7 @@ function loadAssets() {
   game.load.image('player', 'assets/stick-figure.png');
   game.load.image('alien', 'assets/alien.png');
   game.load.image('ogre', 'assets/ogre.png');
+  game.load.image('scary-eris', 'assets/scary-eris.png');
   game.load.image('fireball', 'assets/fireball.png');
   game.load.image('btn-restart', 'assets/btn-restart.png');
 }
@@ -36,11 +38,17 @@ function createBootState() {
   game.physics.arcade.enable(floor);
   floor.body.immovable = true;
 
-  alien = game.add.sprite(-200, floorPosition, 'alien');
+  alien = game.add.sprite(-200, floorPosition, 'ogre');
   game.physics.arcade.enable(alien);
   alien.body.gravity.y = 500;
   alien.body.velocity.x = 50;
   alien.anchor.set(0.5, 1.0);
+
+  eris = game.add.sprite(game.world.width / 2, -100, 'scary-eris');
+  game.physics.arcade.enable(eris);
+  eris.body.gravity.y = 50;
+  eris.body.velocity.y = 50;
+  eris.anchor.set(0.5, 1.0);
 
   var btn = game.add.button(0, 0, 'btn-restart', function() { game.state.start('boot'); });
 }
